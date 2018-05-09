@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!--<springProperty scope="context" name="LOG_PATH" source="logging.path" defaultValue="./logs"/>-->
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%black(Console-) %red(%d{yyyy-MM-dd HH:mm:ss}) %green([%thread]) %highlight(%-5level)
+                %boldMagenta(%logger) - %cyan(%msg%n)
+            </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="hive_199" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>./logs/hive_199.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>./logs/hive_199.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>5GB</totalSizeCap>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+        <encoder>
+            <pattern>[%d{HH:mm:ss.SSS}] [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="hive_199"/>
+    </root>
+
+    <!--<appender name="osmp_mybatis" class="ch.qos.logback.core.rolling.RollingFileAppender">-->
+    <!--<file>${LOG_PATH}/osmp_mybatis.log</file>-->
+    <!--<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">-->
+    <!--<fileNamePattern>${LOG_PATH}/osmp_mybatis.%d{yyyy-MM-dd}.log</fileNamePattern>-->
+    <!--<maxHistory>30</maxHistory>-->
+    <!--<totalSizeCap>1GB</totalSizeCap>-->
+    <!--</rollingPolicy>-->
+    <!--<filter class="ch.qos.logback.classic.filter.ThresholdFilter">-->
+    <!--<level>DEBUG</level>-->
+    <!--</filter>-->
+    <!--<encoder>-->
+    <!--<pattern>[%d{HH:mm:ss.SSS}] [%thread] %-5level %logger{36} - %msg%n</pattern>-->
+    <!--<charset>UTF-8</charset>-->
+    <!--</encoder>-->
+    <!--</appender>-->
+
+    <!--<springProfile name="dev">-->
+    <!--<root level="INFO">-->
+    <!--<appender-ref ref="STDOUT"/>-->
+    <!--<appender-ref ref="osmp_log"/>-->
+    <!--</root>-->
+    <!--<logger name="com.asiainfo.alarm.dao" level="DEBUG" additivity="false">-->
+    <!--<appender-ref ref="STDOUT"/>-->
+    <!--<appender-ref ref="osmp_mybatis"/>-->
+    <!--</logger>-->
+    <!--</springProfile>-->
+
+    <!--<springProfile name="prod">-->
+    <!--<root level="DEBUG">-->
+    <!--<appender-ref ref="osmp_log"/>-->
+    <!--</root>-->
+    <!--<logger name="com.asiainfo.alarm.dao" level="DEBUG" additivity="false">-->
+    <!--<appender-ref ref="osmp_mybatis"/>-->
+    <!--</logger>-->
+    <!--</springProfile>-->
+
+</configuration>
