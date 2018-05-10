@@ -2,14 +2,15 @@ package com.asiainfo;
 
 import com.asiainfo.service.IOperationsOn199Service;
 import com.asiainfo.utils.CUtil;
-import com.ibm.db2.jcc.a.a;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.asiainfo.utils.TypeUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by migle on 2017/1/5.
@@ -18,7 +19,6 @@ import java.util.*;
  */
 public class LoaddataToHive {
 
-    private final static Logger logger = LoggerFactory.getLogger(LoaddataToHive.class);
     private Connection conn = null;
 
     public Connection getConnection(String url) throws Exception {
@@ -49,6 +49,7 @@ public class LoaddataToHive {
 
         //String url = args[1];
         String tabName = args[0];
+        int tbNameLength = args[0].length();
         StringBuilder url = new StringBuilder(
                 "jdbc:hive2://10.113.246.10:24002,10.113.246.8:24002,10.113.246.9:24002/");
         url.append(";serviceDiscoveryMode=").append("zookeeper");
@@ -69,11 +70,11 @@ public class LoaddataToHive {
         System.out.println("====================================");
 
         int colCount = rsmd.getColumnCount();
-        logger.info("tabName In This Batch:{}, ColumnCount:{}", tabName, colCount);
+        System.out.println("tabName In This Batch:" + tabName + " ColumnCount:" + colCount);
 
         System.out.println("====================================");
 
-        logger.info("===================Create table on 199===================");
+        System.out.println("===================Create table on 199===================");
         operationsOn199Service.createTab(createSql(rsmd, tabName, colCount));
 
         /**
@@ -81,7 +82,7 @@ public class LoaddataToHive {
          */
         Map<String, Integer> metaMap = new HashMap();
         for (int index = 1; index <= colCount; index++) {
-            metaMap.put(rsmd.getColumnName(index), rsmd.getColumnType(index));
+            metaMap.put(rsmd.getColumnName(index).substring(tbNameLength + 1), rsmd.getColumnType(index));
         }
 
         //获取插入语句模版
@@ -103,7 +104,7 @@ public class LoaddataToHive {
                 for (int i = 1; i <= colCount; i++) {
 
                     String colName = rsmd.getColumnName(i);
-                    listMap.put(colName, CUtil.getRsValue(metaMap, rs, colName));
+                    listMap.put(colName.substring(tbNameLength + 1), CUtil.getRsValue(metaMap, resultSet, colName, tbNameLength));
                 }
                 //每一行数据存在一个新Map中（防止引用传递）,每一行循环完后将这个Map add到list中。
                 mapList.add(listMap);
@@ -142,11 +143,12 @@ public class LoaddataToHive {
      */
     public static String createSql(ResultSetMetaData rsmd, String tableName, int colCount) throws SQLException {
 
+        int tbNameLength = tableName.length();
         StringBuffer createSql = new StringBuffer("create table ");
         createSql.append(tableName).append(" (");
 
         for (int i = 1; i <= colCount; i++) {
-            createSql.append(rsmd.getColumnName(i)).append(" ").append(rsmd.getColumnTypeName(i))
+            createSql.append(rsmd.getColumnName(i).substring(tbNameLength + 1)).append(" ").append(TypeUtils.getSqlType(rsmd.getColumnType(i)))
                     .append(",");
         }
 
@@ -154,10 +156,10 @@ public class LoaddataToHive {
         String tmpSql = createSql.substring(0, createSql.length() - 1).toString();
 
         StringBuffer createSql2 = new StringBuffer(tmpSql);
-        createSql2.append(") ").append("distribute by hash(").append(rsmd.getColumnName(1)).append(") ");
+        createSql2.append(") ").append("distribute by hash(").append(rsmd.getColumnName(1).substring(tbNameLength + 1)).append(") ");
         createSql2.append("in tbs_app_imcd not logged initially");
 
-        logger.info("CreateTableSql:{}", createSql2.toString());
+        System.out.println("CreateTableSql:" + createSql2.toString());
         return createSql2.toString();
     }
 
@@ -185,7 +187,7 @@ public class LoaddataToHive {
 
         insertSql3.append(" )");
 
-        logger.info("insertSql:{}", insertSql3.toString());
+        System.out.println("insertSql:" + insertSql3.toString());
 
         return insertSql3.toString();
     }

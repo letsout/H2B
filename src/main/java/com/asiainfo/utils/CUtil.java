@@ -32,9 +32,10 @@ public class CUtil {
      * @param name
      * @return
      */
-    public static String getRsValue(Map<String, Integer> columnMap, ResultSet rs, String name) {
+    public static String getRsValue(Map<String, Integer> columnMap, ResultSet rs, String name, int tbNameLength) {
         try {
-            Integer columnType = columnMap.get(name);
+            String k = name.substring(tbNameLength + 1);
+            Integer columnType = columnMap.get(k);
             if (columnType != null) {
                 StringBuffer result = new StringBuffer();
                 switch (columnType.intValue()) {
