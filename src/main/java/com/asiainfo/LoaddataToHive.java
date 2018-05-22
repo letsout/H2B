@@ -3,6 +3,7 @@ package com.asiainfo;
 import com.asiainfo.service.IOperationsOn199Service;
 import com.asiainfo.utils.CUtil;
 import com.asiainfo.utils.TypeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by migle on 2017/1/5.
+ * Created by c on 2017/1/5.
  * 执行load data input 'xxx' into table table_xxxx语句
  * beeline不支持nohup 方式运行
  */
@@ -49,6 +50,8 @@ public class LoaddataToHive {
 
         //String url = args[1];
         String tabName = args[0];
+        String tablenName199 = args[1];
+        String condition = args[2];
         int tbNameLength = args[0].length();
         StringBuilder url = new StringBuilder(
                 "jdbc:hive2://10.113.246.10:24002,10.113.246.8:24002,10.113.246.9:24002/");
@@ -60,9 +63,13 @@ public class LoaddataToHive {
         LoaddataToHive loader = new LoaddataToHive();
         System.out.println("Connecting...");
         Statement st = loader.getConnection(url.toString()).createStatement();
-
-        String queryStructSql = "select * from " + tabName;
-
+        
+        String queryStructSql;
+        if(StringUtils.isNotBlank(condition)){
+            queryStructSql = "select * from " + tabName+" "+condition;
+        }else {
+            queryStructSql = "select * from " + tabName;
+        }
 
         ResultSet rs = st.executeQuery(queryStructSql);
         ResultSetMetaData rsmd = rs.getMetaData();
@@ -75,7 +82,7 @@ public class LoaddataToHive {
         System.out.println("====================================");
 
         System.out.println("===================Create table on 199===================");
-        operationsOn199Service.createTab(createSql(rsmd, tabName, colCount));
+        operationsOn199Service.createTab(createSql(rsmd,tabName,tablenName199, colCount));
 
         /**
          * 此Map里面存储这张表的每个字段名和字段类型(int)->Types这个类是Sql和Java类型对应起来的类。
@@ -86,7 +93,7 @@ public class LoaddataToHive {
         }
 
         //获取插入语句模版
-        String insertSql = insertSql(metaMap, tabName);
+        String insertSql = insertSql(metaMap, tablenName199);
 
         List<Map<String, ?>> mapList = new ArrayList<>();
         Map<String, String> listMap;
@@ -97,7 +104,6 @@ public class LoaddataToHive {
              */
             while (resultSet.next()) {
                 listMap = new HashMap();
-
                 /**
                  * 循环遍历每一行的数据,将每一行的colName和colValue按照Map存储
                  */
@@ -141,11 +147,11 @@ public class LoaddataToHive {
      * @return
      * @throws SQLException
      */
-    public static String createSql(ResultSetMetaData rsmd, String tableName, int colCount) throws SQLException {
+    public static String createSql(ResultSetMetaData rsmd,String tableName, String tableName199, int colCount) throws SQLException {
 
         int tbNameLength = tableName.length();
         StringBuffer createSql = new StringBuffer("create table ");
-        createSql.append(tableName).append(" (");
+        createSql.append(tableName199).append(" (");
 
         for (int i = 1; i <= colCount; i++) {
             createSql.append(rsmd.getColumnName(i).substring(tbNameLength + 1)).append(" ").append(TypeUtils.getSqlType(rsmd.getColumnType(i)))

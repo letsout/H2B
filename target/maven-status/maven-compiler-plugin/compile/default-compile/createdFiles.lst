@@ -1,0 +1,8 @@
+com\asiainfo\LoaddataToHive.class
+com\asiainfo\utils\HiveJDBC.class
+com\asiainfo\utils\TypeUtils.class
+com\asiainfo\dao\IOperationsOn199Dao.class
+com\asiainfo\utils\SpringUtil.class
+com\asiainfo\utils\CUtil.class
+com\asiainfo\service\impl\OperationsOn199ServiceImpl.class
+com\asiainfo\service\IOperationsOn199Service.class
