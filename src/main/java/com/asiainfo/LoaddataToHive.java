@@ -49,6 +49,7 @@ public class LoaddataToHive {
         IOperationsOn199Service operationsOn199Service = (IOperationsOn199Service) applicationContext.getBean("operationsOn199Service");
 
         //String url = args[1];
+        /*1111111111111*/
         String tabName = args[0];
         String tablenName199 = args[1];
         String condition = args[2];
@@ -62,6 +63,7 @@ public class LoaddataToHive {
         System.out.println("url:" + url);
         LoaddataToHive loader = new LoaddataToHive();
         System.out.println("Connecting...");
+        System.out.println("jdbc:hive2://10.113.246.10:24002,10.113.246.8:24002,10.113.246.9:24002/");
         Statement st = loader.getConnection(url.toString()).createStatement();
         
         String queryStructSql;
